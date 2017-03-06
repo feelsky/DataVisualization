@@ -1,0 +1,220 @@
+<!doctype html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+    <script src="jquery.csv.js"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="plotly.js"></script>
+    
+</head>
+<body>
+<div id="myDiv">
+</div>
+<script>
+/*
+    //按类别统计犯罪数量
+    var ySavings = [];
+    var ary = [];
+    d3.csv("sanfrancisco_incidents_summer_2014.csv", function(data) {
+       //console.log(data);
+       
+       //data.sort(function(a){return a.Category});
+       for(var k = 0; k < data.length; k++){
+           ary[k] = data[k].Category;
+       }
+       ary.sort();
+       //console.info(data);
+       
+       for(var i=0; i<ary.length;){
+           var count = 0;
+           for(var j=i;j<ary.length;j++){
+               if(ary[i] == ary[j]){
+                   count++;
+               }
+           }
+           ySavings.push([ary[i],count]);
+           i+=count;
+       }
+       for(var i = 0 ;i<ySavings.length;i++)  
+        {  
+            //console.info(ySavings[i][0]+" "+ySavings[i][1]);
+        }
+        
+        
+        var xSavings = [];
+        var yS = [];
+        for(var i=0; i < ySavings.length; i++){
+            xSavings[i] = ySavings[i][1];
+            yS[i] = ySavings[i][0];
+        }
+        console.info(yS);
+        //var ySavings = ['Japan', 'United Kingdom', 'Canada', 'Netherlands', 'United States', 'Belgium', 'Sweden', 'Switzerland'];
+
+        var trace1 = {
+          x: xSavings,
+          y: yS,
+          xaxis: 'x1',
+          yaxis: 'y1',
+          type: 'bar',
+          marker: {
+            color: 'rgba(50,171,96,0.6)',
+            line: {
+              color: 'rgba(50,171,96,1.0)',
+              width: 1
+            }
+          },
+          name: 'Category Count',
+          orientation: 'h'
+        };
+
+        var data = [trace1];
+
+        var layout = {
+          title: 'Category Count(2014.06.01-2014.08.31)',
+          xaxis1: {
+            range: [0, 10000],
+            domain: [0, 100],
+            zeroline: false,
+            showline: false,
+            showticklabels: true,
+            showgrid: true
+          },
+          legend: {
+            x: 0.029,
+            y: 1.238,
+            font: {
+              size: 10
+            }
+          },
+          margin: {
+            l: 210,
+            r: 10,
+            t: 100,
+            b: 100
+          },
+          width: 1600,
+          height: 800,
+          paper_bgcolor: 'rgb(248,248,255)',
+          plot_bgcolor: 'rgb(248,248,255)',
+          annotations: [
+            {
+              xref: 'paper',
+              yref: 'paper',
+              x: -0.2,
+              y: -0.109,
+              text: '',
+              showarrow: false,
+              font:{
+                family: 'Arial',
+                size: 10,
+                color: 'rgb(150,150,150)'
+              }
+            }
+          ]
+        };
+        //------ 这段百分比去掉---------
+        for ( var i = 0 ; i < xSavings.length ; i++ ) {
+          var result = {
+            xref: 'x1',
+            yref: 'y1',
+            x: xSavings[i]+2.3,
+            y: ySavings[i],
+            text: xSavings[i] + '%',
+            font: {
+              family: 'Arial',
+              size: 12,
+              color: 'rgb(50, 171, 96)'
+            },
+             showarrow: false,
+          };
+          layout.annotations.push(result);
+        }
+        //-----------------------------
+
+        Plotly.newPlot('myDiv', data, layout);
+    });
+    */
+    //按每天每隔15分钟统计犯罪数量
+    Plotly.d3.csv("sanfrancisco_incidents_summer_2014.csv", function(rows) {
+        //console.info(rows);
+        var ary = [];
+        var savings = [];
+        for(var k = 0; k < rows.length; k++){
+           ary[k] = rows[k].Time;
+        }
+        ary.sort();
+        console.info(ary.length);
+        
+        for(var kn=0; kn < ary.length; kn++){
+            var temp = ary[kn].split(":");
+            if(parseInt(temp[1]) <= 10 && parseInt(temp[1]) >= 0){
+                temp[1]="00";
+            }else if(parseInt(temp[1]) <= 20 && parseInt(temp[1]) > 10){
+                temp[1]="10";
+            }else if(parseInt(temp[1]) <= 30 && parseInt(temp[1]) > 20){
+                temp[1]="20";
+            }else if(parseInt(temp[1]) <= 40 && parseInt(temp[1]) > 30){
+                temp[1]="30";
+            }else if(parseInt(temp[1]) <= 50 && parseInt(temp[1]) > 40){
+                temp[1]="40";
+            }else if(parseInt(temp[1]) <= 59 && parseInt(temp[1]) > 50){
+                temp[1]="50";
+            }
+            ary[kn] = temp[0] + ":" + temp[1];
+        }
+        console.info(ary.length);
+        
+        for(var i=0; i<ary.length;){
+            var count = 0;
+            for(var j=i;j<ary.length;j++){
+                if(ary[i] == ary[j]){
+                    count++;
+                }
+            }
+            savings.push({"time":ary[i],"count":count});
+            i+=count;
+        }
+        console.info(savings.length);
+        
+        var trace = {
+          type: 'scatter',                    // set the chart type
+          mode: 'lines',                      // connect points with lines
+          x: savings.map(function(row){          // set the x-data
+              return row['time'];
+          }),
+          y: savings.map(function(row){          // set the x-data
+              return row['count'];
+          }),
+          line: {                             // set the width of the line.
+            width: 1
+          },
+          
+          error_y: {
+            array:savings.map(function(row){          // set the x-data
+              return row['count'];
+            }),
+            thickness: 0.3,                   // set the thickness of the error bars
+            width: 0
+          }
+        };
+
+        var layout = {
+            title :"Count by 10m/24h",
+          yaxis: {title: ""},       // set the y axis title
+          xaxis: {
+            showgrid: false,                 // remove the x-axis grid lines 
+            
+          },
+          margin: {                           // update the left, bottom, right, top margin
+            l: 100, b: 100, r: 10, t: 100
+          },
+          width: 1000,
+          height: 500,
+        };
+        Plotly.plot(document.getElementById('myDiv'), [trace], layout, {showLink: false});
+    });
+</script>
+    
+</body>
+</html>

@@ -1,0 +1,88 @@
+<html>
+<head>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="csv.js"></script>
+  <style>
+      #randomize {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <div id="graph"></div>
+  <button id="randomize" onclick="javascript:zoom()">Zoom!</button>
+  <script>
+ /*       
+       var n = 500;
+        var x = [], y = [];
+        for (var i = 0; i < n; i++) {
+          x[i] = i / (n - 1);
+          y[i] = x[i] + 0.2 * (Math.random() - 0.5);
+        }
+
+        Plotly.plot('graph', [{
+          x: x,
+          y: y,
+          mode: 'markers'
+        }], {
+          xaxis: {range: [0, 1]},
+          yaxis: {range: [0, 1]}
+        });
+       
+        function zoom() {
+          var min = 0.45 * Math.random();
+          var max = 0.55 + 0.45 * Math.random();
+          Plotly.animate('graph', {
+            layout: {
+              xaxis: {range: [min, max]},
+              yaxis: {range: [min, max]}
+            }
+          }, {
+            transition: {
+              duration: 500,
+              easing: 'cubic-in-out'
+            }
+          })
+        }*/
+        
+        Plotly.d3.csv('https://raw.githubusercontent.com/plotly/datasets/master/wind_speed_laurel_nebraska.csv', function(rows){
+            var trace = {
+              type: 'scatter',                    // set the chart type
+              mode: 'lines',                      // connect points with lines
+              x: rows.map(function(row){          // set the x-data
+                return row['Time'];
+              }),
+              y: rows.map(function(row){          // set the x-data
+                return row['10 Min Sampled Avg'];
+              }),
+              line: {                             // set the width of the line.
+                width: 1
+              },
+              error_y: {
+                array: rows.map(function(row){    // set the height of the error bars
+                  return row['10 Min Std Dev'];
+                }),
+                thickness: 0.5,                   // set the thickness of the error bars
+                width: 0
+              }
+            };
+
+            var layout = {
+              yaxis: {title: "Wind Speed"},       // set the y axis title
+              xaxis: {
+                showgrid: false,                  // remove the x-axis grid lines
+                tickformat: "%B, %Y"              // customize the date format to "month, day"
+              },
+              margin: {                           // update the left, bottom, right, top margin
+                l: 40, b: 20, r: 10, t: 20
+              }
+            };
+
+        Plotly.plot(document.getElementById('graph'), [trace], layout, {showLink: false});
+});
+  </script>
+</body>
+</html>
